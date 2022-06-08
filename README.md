@@ -1,3 +1,6 @@
 # 8080emulator
 Emulator for 8080 microprocessor.
-This was made following the steps on http://www.emulator101.com/
+
+# Sources Used
+http://www.emulator101.com/
+https://altairclone.com/downloads/manuals/8080%20Programmers%20Manual.pdf
