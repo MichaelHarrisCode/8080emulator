@@ -7,9 +7,9 @@
 Testing main for this file.
 Perhaps this could be turned into a function?
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-    if (argv[1] == NULL)
+    if (argv[1] == NULL) 
     {
         printf("error: Missing file name argument\n");
         exit(EXIT_FAILURE);

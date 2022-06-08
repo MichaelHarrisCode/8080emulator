@@ -3,8 +3,8 @@
 # file names, then I somehow do everything else
 # dynamically? =D 
 
-output: main.o 8080emu.o 8080dis.o 8080xtra.o
-	gcc main.o 8080emu.o 8080dis.o 8080xtra.o -o output
+output: main.o 8080emu.o 8080dis.o 8080xtra.o 8080ops.o
+	gcc main.o 8080emu.o 8080dis.o 8080xtra.o 8080ops.o -o output
 
 main.o: main.c
 	gcc -c main.c
@@ -17,6 +17,9 @@ main.o: main.c
 
 8080xtra.o: 8080xtra.c
 	gcc -c 8080xtra.c
+
+8080ops.o: 8080ops.c
+	gcc -c 8080ops.c
 
 clean:
 	rm *.o output

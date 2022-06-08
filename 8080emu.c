@@ -1,4 +1,5 @@
 #include "8080emu.h"
+#include "8080ops.h"
 
 // Emulates an 8080 instruction based on current PC
 int emulate8080Op(State8080 *state)
@@ -7,11 +8,9 @@ int emulate8080Op(State8080 *state)
 
 	switch (*opcode)
 	{
-		case 0x00: break;	// NOP
-		case 0x01:			// LXI	B,D16
-			state->c = opcode[1];
-			state->b = opcode[2];
-			state->pc += 2;
+		case 0x00: break;		// NOP
+		case 0x01: 
+			lxi_b_d16(state, opcode[1], opcode[2]); 
 			break;
 		case 0x02:			// STAX	B
 			state->memory[state->bc] = state->a;

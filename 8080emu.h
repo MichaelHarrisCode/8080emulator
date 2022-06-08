@@ -1,5 +1,5 @@
-#ifndef EMU8080_H
-#define EMU8080_H
+#ifndef _8080EMU_H
+#define _8080EMU_H
 
 #include <stdint.h>
 
