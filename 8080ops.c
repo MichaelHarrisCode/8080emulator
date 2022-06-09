@@ -1,4 +1,4 @@
-#include "8080ops.h"
+#include "8080emu.h"
 
 void lxi_b_d16(State8080 *state, uint8_t first, uint8_t second)
 {

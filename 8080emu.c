@@ -1,5 +1,4 @@
 #include "8080emu.h"
-#include "8080ops.h"
 
 // Emulates an 8080 instruction based on current PC
 int emulate8080Op(State8080 *state)
