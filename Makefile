@@ -3,8 +3,25 @@
 # file names, then I somehow do everything else
 # dynamically? =D 
 
-output: main.o 8080emu.o 8080dis.o 8080xtra.o 8080ops.o
+.build: main.o 8080emu.o 8080dis.o 8080xtra.o 8080ops.o
 	gcc main.o 8080emu.o 8080dis.o 8080xtra.o 8080ops.o -o output
+
+.run: 
+	./output
+
+.clean-objs:
+	rm *.o
+
+build: .build .clean-objs
+
+build-all: .build
+
+run: .build .run clean
+
+clean:
+	rm *.o output
+
+
 
 main.o: main.c
 	gcc -c main.c
@@ -20,6 +37,3 @@ main.o: main.c
 
 8080ops.o: 8080ops.c
 	gcc -c 8080ops.c
-
-clean:
-	rm *.o output
