@@ -1,43 +1,5 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
 #include "8080emu.h"
-
-/*
-Testing main for this file.
-Perhaps this could be turned into a function?
-
-int main(int argc, char **argv)
-{
-    if (argv[1] == NULL) 
-    {
-        printf("error: Missing file name argument\n");
-        exit(EXIT_FAILURE);
-    }
-    FILE* file = fopen(argv[1], "rb");
-    if (file == NULL)
-    {
-        printf("error: File couldn't be loaded\n");
-        exit(EXIT_FAILURE);
-    }
-
-    fseek(file, 0l, SEEK_END);
-    int file_size = ftell(file);
-    fseek(file, 0l, SEEK_SET);
-
-    uint8_t *buffer = malloc(file_size);
-
-    fread(buffer, file_size, 1, file);
-    fclose(file);
-
-    int pc = 0;
-
-    while(pc < file_size)
-        pc += disassemble8080Op(buffer, pc);
-
-    return 0;
-}
-*/
+#include <stdio.h>
 
 // Disassembles code into assembly instructions.
 int disassemble8080Op(uint8_t *codebuffer, int pc)
