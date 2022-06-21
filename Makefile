@@ -1,9 +1,10 @@
 CC := gcc
 CFLAGS := -g
 
-SRC_DIR := src
-OBJ_DIR := obj
-BIN_DIR := bin
+SRC_DIR   := src
+OBJ_DIR   := build/obj
+BIN_DIR   := build/bin
+BUILD_DIR := build
 
 OUTPUT = $(BIN_DIR)/emulator
 
@@ -14,11 +15,15 @@ OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 
 
-build: ${OBJ}
-	$(CC) ${OBJ} -o $(OUTPUT)
+build: $(OUTPUT)
 
 clean:
-	rm $(OBJ_DIR)/*.o $(OUTPUT)
+	rm -rf $(BUILD_DIR)
+
+$(OUTPUT): ${OBJ}
+	mkdir -p $(@D)
+	$(CC) ${OBJ} -o $(OUTPUT)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c -o $@ $<
