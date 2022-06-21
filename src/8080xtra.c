@@ -1,12 +1,12 @@
-#include "8080emu.h"
+#include "../include/8080emu.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 // Will run if an unimplemented instruction is called.
 void unimplementedInstruction(uint8_t code)
 {
-    printf("error: Missing Code Definition for 0x%02x\n", code);
-    exit(EXIT_FAILURE);
+	printf("error: Missing Code Definition for 0x%02x\n", code);
+	exit(EXIT_FAILURE);
 }
 
 // Calculates Parity

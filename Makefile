@@ -1,39 +1,24 @@
-# Figure out how to make this dynamic and fun
-# Perhaps, I could have an array that holds the
-# file names, then I somehow do everything else
-# dynamically? =D 
+CC := gcc
+CFLAGS := -g
 
-.build: main.o 8080emu.o 8080dis.o 8080xtra.o 8080ops.o
-	gcc main.o 8080emu.o 8080dis.o 8080xtra.o 8080ops.o -o output
+SRC_DIR := src
+OBJ_DIR := obj
+BIN_DIR := bin
 
-.run: 
-	./output
+OUTPUT = $(BIN_DIR)/emulator
 
-.clean-objs:
-	rm *.o
+SRC := $(wildcard $(SRC_DIR)/*.c)
+OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
-build: .build .clean-objs
+.PHONY = build clean run
 
-build-all: .build
 
-run: .build .run clean
+
+build: ${OBJ}
+	$(CC) ${OBJ} -o $(OUTPUT)
 
 clean:
-	rm *.o output
+	rm $(OBJ_DIR)/*.o $(OUTPUT)
 
-
-
-main.o: main.c
-	gcc -c main.c
-
-8080emu.o: 8080emu.c
-	gcc -c 8080emu.c
-
-8080dis.o: 8080dis.c
-	gcc -c 8080dis.c
-
-8080xtra.o: 8080xtra.c
-	gcc -c 8080xtra.c
-
-8080ops.o: 8080ops.c
-	gcc -c 8080ops.c
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c -o $@ $<

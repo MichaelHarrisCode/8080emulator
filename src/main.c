@@ -1,4 +1,4 @@
-#include "8080emu.h"
+#include "../include/8080emu.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

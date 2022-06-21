@@ -1,5 +1,4 @@
-#include "8080emu.h"
-
+#include "../include/8080emu.h"
 // Emulates an 8080 instruction based on current PC
 int emulate8080Op(State8080 *state)
 {
@@ -11,33 +10,23 @@ int emulate8080Op(State8080 *state)
 		case 0x01: 
 			lxi_b_d16(state, opcode[1], opcode[2]); 
 			break;
-		case 0x02:			// STAX	B
-			state->memory[state->bc] = state->a;
+		case 0x02:
+			stax_b(state);
 			break;
-		case 0x03:			// INX B
-			state->bc++;
+		case 0x03:
+			inx_b(state);
 			break;
-		case 0x04:			// INR B
-			state->b++;
-			flagsZSP(state, state->b);
-			flagAC(state, state->b, 1);
+		case 0x04:
+			inr_b(state);
 			break;
-		case 0x05:			// DCR B
-			state->b--;
-			flagsZSP(state, state->b);
-			flagAC(state, state->b, -1);
+		case 0x05:
+			dcr_b(state);
 			break;
-		case 0x06:			// MVI B,D8
-			state->b = opcode[1];
-			state->pc++;
+		case 0x06:
+			mvi_b_d8(state, opcode[1]);
 			break;
-		case 0x07:			// RLC			Not sure if this works right. Probably test the logic.
-			{
-				uint8_t bit_7 = (0x80 == (state->a & 0x80));
-				state->a <<= 1;
-				state->a = state->a | bit_7;
-				state->cc.cy = bit_7;
-			}
+		case 0x07:		
+			rlc(state);
 			break;
 		case 0x08: break;	// Blank instruction
 		case 0x09:			// DAD B
