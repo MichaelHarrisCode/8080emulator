@@ -1,209 +1,149 @@
 #include "../include/8080emu.h"
 // Emulates an 8080 instruction based on current PC
-int emulate8080Op(State8080 *state)
+int emulate8080Op(State8080 *self)
 {
-	uint8_t *opcode = &state->memory[state->pc];
+	uint8_t *opcode = &self->memory[self->pc];
 
 	switch (*opcode)
 	{
 		case 0x00: break;		// NOP
 		case 0x01: 
-			lxi_b_d16(state, opcode[1], opcode[2]); 
+			lxi_b_d16(self, opcode[1], opcode[2]); 
 			break;
 		case 0x02:
-			stax_b(state);
+			stax_b(self);
 			break;
 		case 0x03:
-			inx_b(state);
+			inx_b(self);
 			break;
 		case 0x04:
-			inr_b(state);
+			inr_b(self);
 			break;
 		case 0x05:
-			dcr_b(state);
+			dcr_b(self);
 			break;
 		case 0x06:
-			mvi_b_d8(state, opcode[1]);
+			mvi_b_d8(self, opcode[1]);
 			break;
 		case 0x07:		
-			rlc(state);
+			rlc(self);
 			break;
 		case 0x08: break;	// Blank instruction
-		case 0x09:			// DAD B
-			state->hl += state->bc;
-
-			state->cc.cy = ((uint32_t)(state->hl + state->bc) > 0xffff);
+		case 0x09:
+			dad_b(self);
 			break;
-		case 0x0a:			// LDAX B
-			state->a = state->memory[state->bc];
+		case 0x0a:
+			ldax_b(self);
 			break;
-		case 0x0b:			// DCX B
-			state->bc--;
+		case 0x0b:
+			dcx_b(self);
 			break;
-		case 0x0c:			// INR C
-			state->c++;
-			flagsZSP(state, state->c);
-			flagAC(state, state->c, 1);
+		case 0x0c:
+			inr_c(self);
 			break;
-		case 0x0d:			// DCR C
-			state->c--;
-			flagsZSP(state, state->c);
-			flagAC(state, state->c, -1);
+		case 0x0d:
+			dcr_c(self);
 			break;
-		case 0x0e:			// MVI C,D8
-			state->c = opcode[1];
-			state->pc++;
+		case 0x0e:
+			mvi_c_d8(self, opcode[1]);
 			break;
-		case 0x0f:			// RRC			Think this through again
-			{
-				uint8_t bit_0 = (state->a & 0x1);
-				state->a >>= 1;
-				state->cc.cy = bit_0;
-				bit_0 <<= 7;
-				state->a = state->a | bit_0;
-			}
+		case 0x0f:
+			rrc(self);
 			break;
 		case 0x10: break;	// Blank instruction
-		case 0x11:			// LXI D,D16 
-			state->e = opcode[1];
-			state->d = opcode[2];
-			state->pc += 2;
+		case 0x11:
+			lxi_d_d16(self, opcode[1], opcode[2]);
 			break;
-		case 0x12:			// STAX D
-			state->memory[state->de] = state->a;
+		case 0x12:
+			stax_d(self);
 			break;
-		case 0x13:			// INX D
-			state->de++;
+		case 0x13:
+			inx_d(self);
 			break;
-		case 0x14:			// INR D
-			state->d++;
-			flagsZSP(state, state->d);
-			flagAC(state, state->d, 1);
+		case 0x14:
+			inr_d(self);
 			break;
-		case 0x15:			// DCR D
-			state->d--;
-			flagsZSP(state, state->d);
-			flagAC(state, state->d, -1);
+		case 0x15:
+			dcr_d(self);
 			break;
-		case 0x16:			// MVI D,D8
-			state->d = opcode[1];
-			state->pc++;
+		case 0x16:
+			mvi_d_d8(self, opcode[1]);
 			break;
-		case 0x17:			// RAL
-			{
-				uint8_t bit_7 = (0x80 == (0x80 & state->a));
-				state->a <<= 1;
-				state->a = state->a | state->cc.cy;
-				state->cc.cy = bit_7;
-			}
+		case 0x17:
+			ral(self);
 			break;
 		case 0x18: break;	// Blank Instruction
-		case 0x19:			// DAD D
-			state->hl = state->hl + state->de;
-
-			state->cc.cy = ((uint32_t)(state->hl + state->de) > 0xffff);
+		case 0x19:
+			dad_d(self);
 			break;
-		case 0x1a:			// LDAX D
-			state->a = state->memory[state->de];
+		case 0x1a:
+			ldax_d(self);
 			break;
-		case 0x1b:			// DCX D
-			state->de--;
+		case 0x1b:
+			dcx_d(self);
 			break;
-		case 0x1c:			// INR E
-			state->e++;
-			flagsZSP(state, state->e);
-			flagAC(state, state->e, 1);
+		case 0x1c:
+			inr_e(self);
 			break;
-		case 0x1d:			// DCR E
-			state->e--;
-			flagsZSP(state, state->e);
-			flagAC(state, state->e, -1);
+		case 0x1d:
+			dcr_e(self);
 			break;
-		case 0x1e:			// MVI E,D8
-			state->e = opcode[1];
-			state->pc++;
+		case 0x1e:
+			mvi_e_d8(self, opcode[1]);
 			break;
-		case 0x1f:			// RAR			Did I get this right?
-			{
-				uint8_t bit_0 = (state->a & 0x1);
-				state->a >>= 1;
-				state->a = state->a | (state->cc.cy << 7);
-				state->cc.cy = bit_0;
-			}
+		case 0x1f:
+			rar(self);
 			break;
 		case 0x20: break;	// Blank Instruction
-		case 0x21:			// LXI H,D16
-			state->l = opcode[1];
-			state->h = opcode[2];
-			state->pc += 2;
+		case 0x21:
+			lxi_h_d16(self, opcode[1], opcode[2]);
 			break;
-		case 0x22:			// SHLD adr     Is this correct?
- 			{
-				uint16_t address = opcode[1] | (opcode[2] << 8);
-				state->memory[address] = state->l;
-				state->memory[address + 1] = state->h;
-				state->pc += 2;
-			}
+		case 0x22:
+ 			shld_adr(self, opcode[1], opcode[2]);
 			break;
-		case 0x23:			// INX H
-			state->hl++;
+		case 0x23:
+			inx_h(self);
 			break;
-		case 0x24:			// INR H
-			state->h++;
-			flagsZSP(state, state->h);
-			flagAC(state, state->h, 1);
+		case 0x24:
+			inr_h(self);
 			break;
-		case 0x25:			// DCR H
-			state->h--;
-			flagsZSP(state, state->h);
-			flagAC(state, state->h, -1);
+		case 0x25:
+			dcr_h(self);
 			break;
-		case 0x26:			// MVI H,D8
-			state->h = opcode[1];
-			state->pc++;
+		case 0x26:
+			mvi_h_d8(self, opcode[1]);
 			break;
-		case 0x27:			// DAA
-			// WHAT THE FRIIIIIIICK DO I DO HERE?
+		case 0x27:
+			daa(self);
 			break;
 		case 0x28: break;	// Blank Instruction
-		case 0x29:			// DAD H
-			state->cc.cy = (0x80 == (0x80 & state->hl));
-			// Apparently, adding two 16-bit numbers to itself is equivalent to 
-			// shifting it to the left by one bit. 
-			// Original should be: state->hl = state->hl + state->hl;
-			state->h <<= 1;
+		case 0x29:
+			dad_h(self);
 			break;
-		case 0x2a:			// LHLD adr
-			state->l = opcode[1];
-			state->h = opcode[2];
-			state->pc += 2;
+		case 0x2a:
+			lhld_adr(self, opcode[1], opcode[2]);
 			break;
-		case 0x2b:			// DCX H
-			state->hl--;
+		case 0x2b:
+			dcx_h(self);
 			break;
-		case 0x2c:			// INR L
-			state->l++;
-			flagsZSP(state, state->l);
-			flagAC(state, state->l, 1);
+		case 0x2c:
+			inr_l(self);
 			break;
-		case 0x2d:			// DCR L
-			state->l--;
-			flagsZSP(state, state->l);
-			flagAC(state, state->l, -1);
+		case 0x2d:
+			dcr_l(self);
 			break;
-		case 0x2e:			// MVI L,D8
-			state->l = opcode[1];
-			state->pc++;
+		case 0x2e:
+			mvi_l_d8(self, opcode[1]);
 			break;
 		case 0x2f:			// CMA
-			state->a = ~state->a;
+			cma(self);
 			break;
 		case 0x30: break;	// Blank Instruction
-		case 0x31:			// LXI SP,D16
+		case 0x31:
 			
 			break;
 
 		default: unimplementedInstruction(*opcode);
 	}
-	state->pc++;
+	self->pc++;
 }

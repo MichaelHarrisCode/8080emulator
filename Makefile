@@ -11,7 +11,7 @@ OUTPUT = $(BIN_DIR)/emulator
 SRC := $(wildcard $(SRC_DIR)/*.c)
 OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
-.PHONY = build clean run
+.PHONY = build clean
 
 
 
