@@ -9,6 +9,12 @@ void unimplementedInstruction(uint8_t code)
 	exit(EXIT_FAILURE);
 }
 
+// Concatenates an address from high and low bits
+uint16_t address_concat(uint8_t low, uint8_t high)
+{
+	return high << 8 | low;
+}
+
 // Calculates Parity
 int parity(uint8_t value)
 {

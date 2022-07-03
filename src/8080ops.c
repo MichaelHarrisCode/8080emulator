@@ -214,7 +214,7 @@ void lxi_h_d16(State8080 *self, uint8_t low, uint8_t high)
 // Is this correct?
 void shld_adr(State8080 *self, uint8_t low, uint8_t high)
 {
-	uint16_t address = low | (high << 8);
+	uint16_t address = address_concat(low, high);
 	self->memory[address] = self->l;
 	self->memory[address + 1] = self->h;
 	self->pc += 2;
@@ -304,18 +304,18 @@ void cma(State8080 *self)
 
 void lxi_sp_d16(State8080 *self, uint8_t low, uint8_t high)
 {
-	self->sp = high << 8 | low;
+	self->sp = address_concat(low, high);
 }
 
 void sta_adr(State8080 *self, uint8_t low, uint8_t high)
 {
-	uint16_t address = high << 8 | low;
+	uint16_t address = address_concat(low, high);
 	self->memory[address] = self->a;
 }
 
 void inx_sp(State8080 *self)
 {
-
+	
 }
 
 void inr_m(State8080 *self)

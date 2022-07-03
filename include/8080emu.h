@@ -59,6 +59,7 @@ struct State8080 {
 
 // Debugging function.
 void unimplementedInstruction(uint8_t code);
+uint16_t address_concat(uint8_t low, uint8_t high);
 int parity(uint8_t value);
 void flagsZSP(State8080 *self, uint8_t value);
 void flagAC(State8080 *self, uint8_t initial, int16_t added);		// CY flag is set in the opcode logic, since it's different by opcode
