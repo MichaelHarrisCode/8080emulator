@@ -44,15 +44,18 @@ void flagsZSP(State8080 *state, uint8_t value)
 }
 
 // Sets flag AC
-// Space invaders doesn't use this, so testing is an issue.
-// Does this work with negatives???
+// Tested and seems to work
+// If the added num is < 0, reset ac
+// I may have to do this flag BEFORE performing the operation
 void flagAC(State8080 *state, uint8_t initial, int16_t added)
 {
+	if (added < 0) {
+		self->cc.ac = 0;
+		return;
+	}
+
 	initial = (initial & 0xf);
 	added = (added & 0xf);
 
-	if ((uint8_t)(initial + added) > 0xf)
-		state->cc.ac = 1;
-	else
-		state->cc.ac = 0;
+	state->cc.ac = ((uint8_t)(initial + added) > 0xf);
 }
