@@ -31,23 +31,23 @@ int parity(uint8_t value)
 }
 
 // Sets flags Z, S, and P
-void flagsZSP(State8080 *state, uint8_t value)
+void flagsZSP(State8080 *self, uint8_t value)
 {
 	// Zero flag
-	state->cc.z = (value == 0);
+	self->cc.z = (value == 0);
 
 	// Sign flag
-	state->cc.s = (0x80 == (value & 0x80));
+	self->cc.s = (0x80 == (value & 0x80));
 
 	// Parity flag
-	state->cc.p = parity(value);
+	self->cc.p = parity(value);
 }
 
 // Sets flag AC
 // Tested and seems to work
 // If the added num is < 0, reset ac
 // I may have to do this flag BEFORE performing the operation
-void flagAC(State8080 *state, uint8_t initial, int16_t added)
+void flagAC(State8080 *self, uint8_t initial, int16_t added)
 {
 	if (added < 0) {
 		self->cc.ac = 0;
@@ -57,5 +57,5 @@ void flagAC(State8080 *state, uint8_t initial, int16_t added)
 	initial = (initial & 0xf);
 	added = (added & 0xf);
 
-	state->cc.ac = ((uint8_t)(initial + added) > 0xf);
+	self->cc.ac = ((uint8_t)(initial + added) > 0xf);
 }
