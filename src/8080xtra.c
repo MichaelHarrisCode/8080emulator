@@ -44,16 +44,9 @@ void flagsZSP(State8080 *self, uint8_t value)
 }
 
 // Sets flag AC
-// Tested and seems to work
-// If the added num is < 0, reset ac
 // I may have to do this flag BEFORE performing the operation
-void flagAC(State8080 *self, uint8_t initial, int16_t added)
+void flagAC(State8080 *self, uint8_t initial, uint16_t added)
 {
-	if (added < 0) {
-		self->cc.ac = 0;
-		return;
-	}
-
 	initial = (initial & 0xf);
 	added = (added & 0xf);
 
