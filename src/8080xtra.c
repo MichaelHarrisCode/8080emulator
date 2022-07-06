@@ -15,6 +15,32 @@ uint16_t address_concat(uint8_t low, uint8_t high)
 	return high << 8 | low;
 }
 
+
+
+void set_carry(State8080 *self)
+{
+	self->cc.cy = 1;
+}
+
+void reset_carry(State8080 *self)
+{
+	self->cc.cy = 0;
+}
+
+void assign_carry(State8080 *self, uint8_t value)
+{
+	self->cc.cy = value;
+}
+
+
+
+
+/**
+ * 
+ * Flag related functions
+ * 
+ */
+
 // Calculates Parity
 int parity(uint8_t value)
 {

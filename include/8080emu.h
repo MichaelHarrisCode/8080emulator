@@ -66,6 +66,10 @@ void flagAC(State8080 *self, uint8_t initial, uint16_t added);		// CY flag is se
 int disassemble8080Op(uint8_t *codebuffer, int pc);
 int emulate8080Op(State8080 *self);
 
+void set_carry(State8080 *self);
+void reset_carry(State8080 *self);
+void assign_carry(State8080 *self, uint8_t value);
+
 
 
 
