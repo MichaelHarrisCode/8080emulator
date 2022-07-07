@@ -66,10 +66,6 @@ void flagAC(State8080 *self, uint8_t initial, uint16_t added);		// CY flag is se
 int disassemble8080Op(uint8_t *codebuffer, int pc);
 int emulate8080Op(State8080 *self);
 
-void set_carry(State8080 *self);
-void reset_carry(State8080 *self);
-void assign_carry(State8080 *self, uint8_t value);
-
 
 
 
@@ -80,6 +76,16 @@ void assign_carry(State8080 *self, uint8_t value);
  * 		Defined in 8080ops.h
  * 
  */
+
+// Opcode helper functions
+void add(State8080 *self, uint8_t reg);
+void adc(State8080 *self, uint8_t reg);
+void sub(State8080 *self, uint8_t reg);
+void sbb(State8080 *self, uint8_t reg);
+/*void ana(State8080 *self, uint8_t reg);
+void xra(State8080 *self, uint8_t reg);
+void ora(State8080 *self, uint8_t reg);
+void cmp(State8080 *self, uint8_t reg);*/
 
 // 0x00 - 0x0F
 void lxi_b_d16(State8080 *self, uint8_t first, uint8_t second);
