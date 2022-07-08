@@ -9,10 +9,12 @@ typedef struct ConditionCodes ConditionCodes;
 typedef struct State8080 State8080;
 
 
-
+// NOTE: When using this as a variable, the bits are in reverse order.
+// s is the highest order, cy is the lowest order.
+// This can be accessed as the PSW byte
 struct ConditionCodes {
-	// Space invaders doesn't use ac
-	uint8_t z:1, s:1, p:1, cy:1, ac:1, pad:3;
+	// Space invaders doesn't use ac	
+	uint8_t cy:1, BIT_1:1, p:1, BIT_3:1, ac:1, BIT_5:1, z:1, s:1;
 };
 
 struct State8080 {
@@ -59,10 +61,16 @@ struct State8080 {
 
 // Debugging function.
 void unimplementedInstruction(uint8_t code);
+
+State8080 *new_8080();
+void free_8080(State8080 *self);
+
 uint16_t address_concat(uint8_t low, uint8_t high);
+
 int parity(uint8_t value);
 void flagsZSP(State8080 *self, uint8_t value);
 void flagAC(State8080 *self, uint8_t initial, uint16_t added);		// CY flag is set in the opcode logic, since it's different by opcode
+
 int disassemble8080Op(uint8_t *codebuffer, int pc);
 int emulate8080Op(State8080 *self);
 
@@ -76,16 +84,6 @@ int emulate8080Op(State8080 *self);
  * 		Defined in 8080ops.h
  * 
  */
-
-// Opcode helper functions
-void add(State8080 *self, uint8_t reg);
-void adc(State8080 *self, uint8_t reg);
-void sub(State8080 *self, uint8_t reg);
-void sbb(State8080 *self, uint8_t reg);
-/*void ana(State8080 *self, uint8_t reg);
-void xra(State8080 *self, uint8_t reg);
-void ora(State8080 *self, uint8_t reg);
-void cmp(State8080 *self, uint8_t reg);*/
 
 // 0x00 - 0x0F
 void lxi_b_d16(State8080 *self, uint8_t first, uint8_t second);

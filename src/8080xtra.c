@@ -2,6 +2,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+State8080 *new_8080()
+{
+	State8080 *temp = malloc(sizeof(State8080));
+
+	// Initalize PSW condition bits
+	temp->cc.BIT_1 = 1;
+	temp->cc.BIT_3 = 0;
+	temp->cc.BIT_5 = 0;
+
+	return temp;
+}
+
+void free_8080(State8080 *self)
+{
+	free(self);
+}
+
 // Will run if an unimplemented instruction is called.
 void unimplementedInstruction(uint8_t code)
 {
