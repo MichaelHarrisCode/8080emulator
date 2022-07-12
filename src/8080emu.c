@@ -145,5 +145,18 @@ int emulate8080Op(State8080 *self)
 
 		default: unimplementedInstruction(*opcode);
 	}
+	// This *might* cause an issue with jump instructions.
+	// Let's say we just jumped to an address. We've already moved up by
+	// an instruction.
+	// Idea: State8080 has a variable for opcode incrementation. Each time
+	// an instruction is called that doesn't increase the opcode by 1, it
+	// changes the opcodes variable. Below would look like:
+	//
+	// self->pc += self->opcodes;
+	// self->opcodes = 1;
+	//
+	// It would reset to one afterwards.
+	// So, if a function jumps address, it sets opcodes to 0.
+	// If a function uses 3 opcodes, it sets opcodes to 3.
 	self->pc++;
 }

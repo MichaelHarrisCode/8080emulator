@@ -1,6 +1,8 @@
 #ifndef _8080EMU_H
 #define _8080EMU_H
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 
 #define MAX_MEMORY 0x10000
@@ -9,16 +11,20 @@ typedef struct ConditionCodes ConditionCodes;
 typedef struct State8080 State8080;
 
 
-// NOTE: When using this as a variable, the bits are in reverse order.
-// s is the highest order, cy is the lowest order.
-// This can be accessed as the PSW byte
+/**
+ * These are the condition bits (or flags)
+ * 
+ * NOTE: When using this as a variable, the bits are in reverse order.
+ * s is the highest order, cy is the lowest order.
+ * This can be accessed as the PSW byte
+ */
 struct ConditionCodes {
 	// Space invaders doesn't use ac	
 	uint8_t cy:1, BIT_1:1, p:1, BIT_3:1, ac:1, BIT_5:1, z:1, s:1;
 };
 
 struct State8080 {
-	uint8_t a, int_enable, memory[MAX_MEMORY];
+	uint8_t a, inte, memory[MAX_MEMORY];
 	uint16_t sp, pc;
 	ConditionCodes cc;
 
@@ -86,7 +92,7 @@ int emulate8080Op(State8080 *self);
  */
 
 // 0x00 - 0x0F
-void lxi_b_d16(State8080 *self, uint8_t first, uint8_t second);
+void lxi_b_d16(State8080 *self, uint8_t low, uint8_t high);
 void stax_b(State8080 *self);
 void inx_b(State8080 *self);
 void inr_b(State8080 *self);
@@ -102,7 +108,7 @@ void mvi_c_d8(State8080 *self, uint8_t d8);
 void rrc(State8080 *self);
 
 // 0x10 - 0x1F
-void lxi_d_d16(State8080 *self, uint8_t first, uint8_t second);
+void lxi_d_d16(State8080 *self, uint8_t low, uint8_t high);
 void stax_d(State8080 *self);
 void inx_d(State8080 *self);
 void inr_d(State8080 *self);
@@ -118,15 +124,15 @@ void mvi_e_d8(State8080 *self, uint8_t d8);
 void rar(State8080 *self);
 
 // 0x20 - 0x2F
-void lxi_h_d16(State8080 *self, uint8_t first, uint8_t second);
-void shld_adr(State8080 *self, uint8_t first, uint8_t second);
+void lxi_h_d16(State8080 *self, uint8_t low, uint8_t high);
+void shld_adr(State8080 *self, uint8_t low, uint8_t high);
 void inx_h(State8080 *self);
 void inr_h(State8080 *self);
 void dcr_h(State8080 *self);
 void mvi_h_d8(State8080 *self, uint8_t d8);
 void daa(State8080 *self);
 void dad_h(State8080 *self);
-void lhld_adr(State8080 *self, uint8_t first, uint8_t second);
+void lhld_adr(State8080 *self, uint8_t low, uint8_t high);
 void dcx_h(State8080 *self);
 void inr_l(State8080 *self);
 void dcr_l(State8080 *self);
@@ -134,15 +140,15 @@ void mvi_l_d8(State8080 *self, uint8_t d8);
 void cma(State8080 *self);
 
 // 0x30 - 0x3F
-void lxi_sp_d16(State8080 *self, uint8_t first, uint8_t second);
-void sta_adr(State8080 *self, uint8_t first, uint8_t second);
+void lxi_sp_d16(State8080 *self, uint8_t low, uint8_t high);
+void sta_adr(State8080 *self, uint8_t low, uint8_t high);
 void inx_sp(State8080 *self);
 void inr_m(State8080 *self);
 void dcr_m(State8080 *self);
 void mvi_m_d8(State8080 *self, uint8_t d8);
 void stc(State8080 *self);
 void dad_sp(State8080 *self);
-void lda_adr(State8080 *self, uint8_t first, uint8_t second);
+void lda_adr(State8080 *self, uint8_t low, uint8_t high);
 void dcx_sp(State8080 *self);
 void inr_a(State8080 *self);
 void dcr_a(State8080 *self);
@@ -296,67 +302,67 @@ void cmp_a(State8080 *self);
 // 0xC0 - 0xCF
 void rnz(State8080 *self);
 void pop_b(State8080 *self);
-void jnz_adr(State8080 *self, uint8_t first, uint8_t second);
-void jmp_adr(State8080 *self, uint8_t first, uint8_t second);
-void cnz_adr(State8080 *self, uint8_t first, uint8_t second);
+void jnz_adr(State8080 *self, uint8_t low, uint8_t high);
+void jmp_adr(State8080 *self, uint8_t low, uint8_t high);
+void cnz_adr(State8080 *self, uint8_t low, uint8_t high);
 void push_b(State8080 *self);
 void adi_d8(State8080 *self, uint8_t d8);
 void rst_0(State8080 *self);
 void rz(State8080 *self);
-void ret_adr(State8080 *self, uint8_t first, uint8_t second);
-void jz(State8080 *self);
-void cz_adr(State8080 *self, uint8_t first, uint8_t second);
-void call_adr(State8080 *self, uint8_t first, uint8_t second);
+void ret(State8080 *self);
+void jz_adr(State8080 *self, uint8_t low, uint8_t high);
+void cz_adr(State8080 *self, uint8_t low, uint8_t high);
+void call_adr(State8080 *self, uint8_t low, uint8_t high);
 void aci_d8(State8080 *self, uint8_t d8);
 void rst_1(State8080 *self);
 
 // 0xD0 - 0xDF
 void rnc(State8080 *self);
 void pop_d(State8080 *self);
-void jnc_adr(State8080 *self, uint8_t first, uint8_t second);
+void jnc_adr(State8080 *self, uint8_t low, uint8_t high);
 void out_d8(State8080 *self, uint8_t d8);
-void cnc_adr(State8080 *self, uint8_t first, uint8_t second);
+void cnc_adr(State8080 *self, uint8_t low, uint8_t high);
 void push_d(State8080 *self);
 void sui_d8(State8080 *self, uint8_t d8);
 void rst_2(State8080 *self);
 void rc(State8080 *self);
-void jc_adr(State8080 *self, uint8_t first, uint8_t second);
+void jc_adr(State8080 *self, uint8_t low, uint8_t high);
 void in_d8(State8080 *self, uint8_t d8);
-void cc_adr(State8080 *self, uint8_t first, uint8_t second);
+void cc_adr(State8080 *self, uint8_t low, uint8_t high);
 void sbi_d8(State8080 *self, uint8_t d8);
 void rst_3(State8080 *self);
 
 // 0xE0 - 0xEF
 void rpo(State8080 *self);
 void pop_h(State8080 *self);
-void jpo_adr(State8080 *self, uint8_t first, uint8_t second);
+void jpo_adr(State8080 *self, uint8_t low, uint8_t high);
 void xthl(State8080 *self);
-void cpo_adr(State8080 *self, uint8_t first, uint8_t second);
+void cpo_adr(State8080 *self, uint8_t low, uint8_t high);
 void push_h(State8080 *self);
 void ani_d8(State8080 *self, uint8_t d8);
 void rst_4(State8080 *self);
 void rpe(State8080 *self);
 void pchl(State8080 *self);
-void jpe_adr(State8080 *self, uint8_t first, uint8_t second);
+void jpe_adr(State8080 *self, uint8_t low, uint8_t high);
 void xchg(State8080 *self);
-void cpe_adr(State8080 *self, uint8_t first, uint8_t second);
+void cpe_adr(State8080 *self, uint8_t low, uint8_t high);
 void xri_d8(State8080 *self, uint8_t d8);
 void rst_5(State8080 *self);
 
 // 0xF0 - 0xFF
 void rp(State8080 *self);
 void pop_psw(State8080 *self);
-void jp_adr(State8080 *self, uint8_t first, uint8_t second);
+void jp_adr(State8080 *self, uint8_t low, uint8_t high);
 void di(State8080 *self);
-void cp_adr(State8080 *self, uint8_t first, uint8_t second);
+void cp_adr(State8080 *self, uint8_t low, uint8_t high);
 void push_psw(State8080 *self);
 void ori_d8(State8080 *self, uint8_t d8);
 void rst_6(State8080 *self);
 void rm(State8080 *self);
 void sphl(State8080 *self);
-void jm_adr(State8080 *self, uint8_t first, uint8_t second);
+void jm_adr(State8080 *self, uint8_t low, uint8_t high);
 void ei(State8080 *self);
-void cm_adr(State8080 *self, uint8_t first, uint8_t second);
+void cm_adr(State8080 *self, uint8_t low, uint8_t high);
 void cpi_d8(State8080 *self, uint8_t d8);
 void rst_7(State8080 *self);
 
