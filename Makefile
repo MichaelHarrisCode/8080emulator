@@ -1,5 +1,6 @@
 CC := gcc
 CFLAGS := -g
+LDFLAGS := -lglfw
 
 SRC_DIR   := src
 OBJ_DIR   := build/obj
@@ -20,9 +21,12 @@ build: $(OUTPUT)
 clean:
 	rm -rf $(BUILD_DIR)
 
+run:
+	$(BIN_DIR)/emulator
+
 $(OUTPUT): ${OBJ}
 	mkdir -p $(@D)
-	$(CC) ${OBJ} -o $(OUTPUT)
+	$(CC) ${OBJ} -o $(OUTPUT) $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(@D)
