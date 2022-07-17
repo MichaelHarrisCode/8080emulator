@@ -68,8 +68,7 @@ struct State8080 {
 // Debugging function.
 void unimplementedInstruction(uint8_t code);
 
-State8080 *new_8080();
-void free_8080(State8080 *self);
+void init_8080(State8080 *self);
 
 uint16_t address_concat(uint8_t low, uint8_t high);
 
