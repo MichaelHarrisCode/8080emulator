@@ -1,12 +1,59 @@
 #include "../include/8080emu.h"
 
+#include <unistd.h>
+#include <sys/ioctl.h>
+
+#define gotoxy(x,y) printf("\033[%d;%dH", (y), (x))
+
 static void print_debug(State8080 *self)
 {
-	printf("cy=%d p=%d ac=%d z=%d s=%d\n", self->cc.cy, self->cc.p, 
-		self->cc.ac, self->cc.z, self->cc.s);
-	printf("b=0x%02x c=0x%02x d=0x%02x e=0x%02x h=0x%02x l=0x%02x a=0x%02x\n", self->b, self->c,
-		self->d, self->e, self->h, self->l, self->a);
-	printf("sp=0x%04x pc=0x%04x pc_inc=%d\n", self->sp, self->pc, self->pc_inc);
+	const int X_OFFSET = 11;
+	const int Y_OFFSET = 1;
+
+	static unsigned short rows, cols;
+	static int line_count = 1;
+	struct winsize window;
+	uint8_t psw = *(uint8_t *)&self->cc;
+
+
+	ioctl(STDIN_FILENO, TIOCGWINSZ, &window);
+	
+	if (rows != window.ws_row || cols != window.ws_col || line_count % (rows - 1) == 0) {
+		system("clear");
+		line_count = 1;
+	}
+
+	rows = window.ws_row;
+	cols = window.ws_col;
+
+
+	gotoxy(cols - X_OFFSET, 1 + Y_OFFSET);
+	printf("pc=0x%04x", self->pc);
+
+	gotoxy(cols - X_OFFSET, 2 + Y_OFFSET);
+	printf("sp=0x%04x", self->sp);
+
+	gotoxy(cols - X_OFFSET, 4);
+	printf("bc=0x%04x", self->bc);
+	gotoxy(cols - X_OFFSET, 5 + Y_OFFSET);
+	printf("de=0x%04x", self->de);
+	gotoxy(cols - X_OFFSET, 6 + Y_OFFSET);
+	printf("hl=0x%04x", self->hl);
+	gotoxy(cols - X_OFFSET, 7 + Y_OFFSET);
+	printf("a=0x%02x", self->a);
+	gotoxy(cols - X_OFFSET, 8 + Y_OFFSET);
+	printf("psw=0x%02x", psw);
+
+	gotoxy(cols - X_OFFSET, 10 + Y_OFFSET);
+	printf("cy=%d p=%d", self->cc.cy, self->cc.p);
+	gotoxy(cols - X_OFFSET, 11 + Y_OFFSET);
+	printf("ac=%d z=%d", self->cc.ac, self->cc.z);
+	gotoxy(cols - X_OFFSET, 12 + Y_OFFSET);
+	printf("s=%d", self->cc.s);
+
+
+	gotoxy(0, line_count % (rows - 1));
+	line_count++;
 }
 
 // Emulates an 8080 instruction based on current PC
