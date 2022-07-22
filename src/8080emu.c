@@ -5,6 +5,7 @@
 
 #define gotoxy(x,y) printf("\033[%d;%dH", (y), (x))
 
+// Displays register and condition codes on top right of terminal
 static void print_debug(State8080 *self)
 {
 	const int X_OFFSET = 11;
@@ -18,10 +19,13 @@ static void print_debug(State8080 *self)
 
 	ioctl(STDIN_FILENO, TIOCGWINSZ, &window);
 	
-	if (rows != window.ws_row || cols != window.ws_col || line_count % (rows - 1) == 0) {
+	if (rows != window.ws_row || cols != window.ws_col) {
 		system("clear");
 		line_count = 1;
 	}
+
+	if (line_count % (rows - 1) == 0)
+		line_count = 1;
 
 	rows = window.ws_row;
 	cols = window.ws_col;
@@ -52,7 +56,7 @@ static void print_debug(State8080 *self)
 	printf("s=%d", self->cc.s);
 
 
-	gotoxy(0, line_count % (rows - 1));
+	gotoxy(0, line_count);
 	line_count++;
 }
 
