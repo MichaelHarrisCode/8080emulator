@@ -33,7 +33,7 @@ static void print_debug(State8080 *self)
 	gotoxy(cols - X_OFFSET, 2 + Y_OFFSET);
 	printf("sp=0x%04x", self->sp);
 
-	gotoxy(cols - X_OFFSET, 4);
+	gotoxy(cols - X_OFFSET, 4 + Y_OFFSET);
 	printf("bc=0x%04x", self->bc);
 	gotoxy(cols - X_OFFSET, 5 + Y_OFFSET);
 	printf("de=0x%04x", self->de);
