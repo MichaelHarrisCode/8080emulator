@@ -146,8 +146,9 @@ static void jmp_if(State8080 *self, uint8_t condition, uint8_t low, uint8_t high
 		uint16_t address = address_concat(low, high);
 
 		self->pc = address;
+		self->pc_inc = 0;
 	} else {
-		self->pc += 2;
+		self->pc_inc = 3;
 	}
 }
 
@@ -164,7 +165,7 @@ void lxi_b_d16(State8080 *self, uint8_t low, uint8_t high)
 {
 	self->c = low;
 	self->b = high;
-	self->pc += 2;
+	self->pc_inc = 3;
 }
 
 void stax_b(State8080 *self)
@@ -194,7 +195,7 @@ void dcr_b(State8080 *self)
 void mvi_b_d8(State8080 *self, uint8_t d8)
 {
 	self->b = d8;
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void rlc(State8080 *self)
@@ -242,7 +243,7 @@ void dcr_c(State8080 *self)
 void mvi_c_d8(State8080 *self, uint8_t d8)
 {
 	self->c = d8;
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void rrc(State8080 *self)
@@ -263,7 +264,7 @@ void lxi_d_d16(State8080 *self, uint8_t low, uint8_t high)
 {
 	self->e = low;
 	self->d = high;
-	self->pc += 2;
+	self->pc_inc = 3;
 }
 
 void stax_d(State8080 *self)
@@ -293,7 +294,7 @@ void dcr_d(State8080 *self)
 void mvi_d_d8(State8080 *self, uint8_t d8)
 {
 	self->d = d8;
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void ral(State8080 *self)
@@ -336,7 +337,7 @@ void dcr_e(State8080 *self)
 void mvi_e_d8(State8080 *self, uint8_t d8)
 {
 	self->e = d8;
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void rar(State8080 *self)
@@ -357,7 +358,7 @@ void lxi_h_d16(State8080 *self, uint8_t low, uint8_t high)
 {
 	self->l = low;
 	self->h = high;
-	self->pc += 2;
+	self->pc_inc = 3;
 }
 
 // Is this correct?
@@ -368,7 +369,7 @@ void shld_adr(State8080 *self, uint8_t low, uint8_t high)
 	self->memory[address] = self->l;
 	self->memory[address + 1] = self->h;
 
-	self->pc += 2;
+	self->pc_inc = 3;
 }
 
 void inx_h(State8080 *self)
@@ -393,7 +394,7 @@ void dcr_h(State8080 *self)
 void mvi_h_d8(State8080 *self, uint8_t d8)
 {
 	self->h = d8;
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 // I'll probably have to review this logic
@@ -428,7 +429,7 @@ void lhld_adr(State8080 *self, uint8_t low, uint8_t high)
 	self->l = self->memory[address];
 	self->h = self->memory[address + 1];
 
-	self->pc += 2;
+	self->pc_inc = 3;
 }
 
 void dcx_h(State8080 *self)
@@ -453,7 +454,7 @@ void dcr_l(State8080 *self)
 void mvi_l_d8(State8080 *self, uint8_t d8)
 {
 	self->l = d8;
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void cma(State8080 *self)
@@ -477,7 +478,7 @@ void sta_adr(State8080 *self, uint8_t low, uint8_t high)
 	uint16_t address = address_concat(low, high);
 	self->memory[address] = self->a;
 
-	self->pc += 2;
+	self->pc_inc = 3;
 }
 
 void inx_sp(State8080 *self)
@@ -502,7 +503,7 @@ void dcr_m(State8080 *self)
 void mvi_m_d8(State8080 *self, uint8_t d8)
 {
 	self->memory[self->hl] = d8;
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void stc(State8080 *self)
@@ -520,7 +521,7 @@ void lda_adr(State8080 *self, uint8_t low, uint8_t high)
 	uint16_t address = address_concat(low, high);
 	self->a = self->memory[address];
 
-	self->pc += 2;
+	self->pc_inc = 3;
 }
 
 void dcx_sp(State8080 *self)
@@ -545,7 +546,7 @@ void dcr_a(State8080 *self)
 void mvi_a_d8(State8080 *self, uint8_t d8)
 {
 	self->a = d8;
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void cmc(State8080 *self)
@@ -1259,7 +1260,8 @@ void cmp_a(State8080 *self)
 
 void rnz(State8080 *self)
 {
-	!self->cc.z ? ret(self) : (self->pc += 2);
+	if (!self->cc.z)
+		ret(self);
 }
 
 void pop_b(State8080 *self)
@@ -1277,11 +1279,12 @@ void jmp_adr(State8080 *self, uint8_t low, uint8_t high)
 	uint16_t address = address_concat(low, high);
 
 	self->pc = address;
+	self->pc_inc = 0;
 }
 
 void cnz_adr(State8080 *self, uint8_t low, uint8_t high)
 {
-	!self->cc.z ? call_adr(self, low, high) : (self->pc += 2);
+	!self->cc.z ? call_adr(self, low, high) : (self->pc_inc = 3);
 }
 
 void push_b(State8080 *self)
@@ -1292,7 +1295,7 @@ void push_b(State8080 *self)
 void adi_d8(State8080 *self, uint8_t d8)
 {
 	add(self, d8);
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void rst_0(State8080 *self)
@@ -1302,7 +1305,8 @@ void rst_0(State8080 *self)
 
 void rz(State8080 *self)
 {
-	self->cc.z ? ret(self) : (self->pc += 2);
+	if (self->cc.z)
+		ret(self);
 }
 
 void ret(State8080 *self)
@@ -1313,7 +1317,7 @@ void ret(State8080 *self)
 	self->pc = address_concat(pc_low, pc_high);
 
 	// To skip over the operands of the inital subroutine call 
-	self->pc += 2;
+	self->pc_inc = 3;
 }
 
 void jz_adr(State8080 *self, uint8_t low, uint8_t high)
@@ -1323,7 +1327,7 @@ void jz_adr(State8080 *self, uint8_t low, uint8_t high)
 
 void cz_adr(State8080 *self, uint8_t low, uint8_t high)
 {
-	self->cc.z ? call_adr(self, low, high) : (self->pc += 2);
+	self->cc.z ? call_adr(self, low, high) : (self->pc_inc = 3);
 }
 
 void call_adr(State8080 *self, uint8_t low, uint8_t high)
@@ -1337,12 +1341,13 @@ void call_adr(State8080 *self, uint8_t low, uint8_t high)
 	push(self, pc_high, pc_low);
 
 	self->pc = address;
+	self->pc_inc = 0;
 }
 
 void aci_d8(State8080 *self, uint8_t d8)
 {
 	adc(self, d8);
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void rst_1(State8080 *self)
@@ -1358,7 +1363,8 @@ void rst_1(State8080 *self)
 
 void rnc(State8080 *self)
 {
-	!self->cc.cy ? ret(self) : (self->pc += 2);
+	if(!self->cc.cy)
+		ret(self);
 }
 
 void pop_d(State8080 *self)
@@ -1375,12 +1381,12 @@ void out_d8(State8080 *self, uint8_t d8)
 {
 	// todo
 	// Move data from self->a to device d8
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void cnc_adr(State8080 *self, uint8_t low, uint8_t high)
 {
-	!self->cc.cy ? call_adr(self, low, high) : (self->pc += 2);
+	!self->cc.cy ? call_adr(self, low, high) : (self->pc_inc = 3);
 }
 
 void push_d(State8080 *self)
@@ -1391,7 +1397,7 @@ void push_d(State8080 *self)
 void sui_d8(State8080 *self, uint8_t d8)
 {
 	sub(self, d8);
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void rst_2(State8080 *self)
@@ -1401,7 +1407,8 @@ void rst_2(State8080 *self)
 
 void rc(State8080 *self)
 {
-	self->cc.cy ? ret(self) : (self->pc += 2);
+	if (self->cc.cy)
+		ret(self);
 }
 
 void jc_adr(State8080 *self, uint8_t low, uint8_t high)
@@ -1413,18 +1420,18 @@ void in_d8(State8080 *self, uint8_t d8)
 {
 	// todo
 	// Need to read data from input device d8
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void cc_adr(State8080 *self, uint8_t low, uint8_t high)
 {
-	self->cc.cy ? call_adr(self, low, high) : (self->pc += 2);
+	self->cc.cy ? call_adr(self, low, high) : (self->pc_inc = 3);
 }
 
 void sbi_d8(State8080 *self, uint8_t d8)
 {
 	sbb(self, d8);
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void rst_3(State8080 *self)
@@ -1440,7 +1447,8 @@ void rst_3(State8080 *self)
 
 void rpo(State8080 *self)
 {
-	!self->cc.p ? ret(self) : (self->pc += 2);
+	if (!self->cc.p)
+		ret(self);
 }
 
 void pop_h(State8080 *self)
@@ -1468,7 +1476,7 @@ void xthl(State8080 *self)
 
 void cpo_adr(State8080 *self, uint8_t low, uint8_t high)
 {
-	!self->cc.z ? call_adr(self, low, high) : (self->pc += 2);
+	!self->cc.z ? call_adr(self, low, high) : (self->pc_inc = 3);
 }
 
 void push_h(State8080 *self)
@@ -1479,7 +1487,7 @@ void push_h(State8080 *self)
 void ani_d8(State8080 *self, uint8_t d8)
 {
 	ana(self, d8);
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void rst_4(State8080 *self)
@@ -1489,7 +1497,8 @@ void rst_4(State8080 *self)
 
 void rpe(State8080 *self)
 {
-	self->cc.p ? ret(self) : (self->pc += 2);
+	if (self->cc.p)
+		ret(self);
 }
 
 void pchl(State8080 *self)
@@ -1511,7 +1520,7 @@ void xchg(State8080 *self)
 
 void cpe_adr(State8080 *self, uint8_t low, uint8_t high)
 {
-	self->cc.p ? call_adr(self, low, high) : (self->pc += 2);
+	self->cc.p ? call_adr(self, low, high) : (self->pc_inc = 3);
 }
 
 void xri_d8(State8080 *self, uint8_t d8)
@@ -1522,7 +1531,7 @@ void xri_d8(State8080 *self, uint8_t d8)
 	xra(self, d8);
 	self->cc.ac = temp;
 
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void rst_5(State8080 *self)
@@ -1538,7 +1547,8 @@ void rst_5(State8080 *self)
 
 void rp(State8080 *self)
 {
-	!self->cc.s ? ret(self) : (self->pc += 2);
+	if (!self->cc.s)
+		ret(self);
 }
 
 void pop_psw(State8080 *self)
@@ -1571,12 +1581,12 @@ void jp_adr(State8080 *self, uint8_t low, uint8_t high)
 
 void di(State8080 *self)
 {
-	self->inte = 0;
+	self->int_enable = 0;
 }
 
 void cp_adr(State8080 *self, uint8_t low, uint8_t high)
 {
-	!self->cc.z ? call_adr(self, low, high) : (self->pc += 2);
+	!self->cc.z ? call_adr(self, low, high) : (self->pc_inc = 3);
 }
 
 void push_psw(State8080 *self)
@@ -1590,7 +1600,7 @@ void push_psw(State8080 *self)
 void ori_d8(State8080 *self, uint8_t d8)
 {
 	ora(self, d8);
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void rst_6(State8080 *self)
@@ -1600,7 +1610,8 @@ void rst_6(State8080 *self)
 
 void rm(State8080 *self)
 {
-	self->cc.s ? ret(self) : (self->pc += 2);
+	if(self->cc.s)
+		ret(self);
 }
 
 void sphl(State8080 *self)
@@ -1615,18 +1626,18 @@ void jm_adr(State8080 *self, uint8_t low, uint8_t high)
 
 void ei(State8080 *self)
 {
-	self->inte = 1;
+	self->int_enable = 1;
 }
 
 void cm_adr(State8080 *self, uint8_t low, uint8_t high)
 {
-	self->cc.s ? call_adr(self, low, high) : (self->pc += 2);
+	self->cc.s ? call_adr(self, low, high) : (self->pc_inc = 3);
 }
 
 void cpi_d8(State8080 *self, uint8_t d8)
 {
 	cmp(self, d8);
-	self->pc++;
+	self->pc_inc = 2;
 }
 
 void rst_7(State8080 *self)

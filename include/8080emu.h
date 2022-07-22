@@ -24,7 +24,7 @@ struct ConditionCodes {
 };
 
 struct State8080 {
-	uint8_t a, inte, memory[MAX_MEMORY];
+	uint8_t a, int_enable, pc_inc, memory[MAX_MEMORY];
 	uint16_t sp, pc;
 	ConditionCodes cc;
 
@@ -77,7 +77,7 @@ void flagsZSP(State8080 *self, uint8_t value);
 void flagAC(State8080 *self, uint8_t initial, uint16_t added);		// CY flag is set in the opcode logic, since it's different by opcode
 
 int disassemble8080Op(uint8_t *codebuffer, int pc);
-int emulate8080Op(State8080 *self);
+void emulate8080Op(State8080 *self);
 
 
 

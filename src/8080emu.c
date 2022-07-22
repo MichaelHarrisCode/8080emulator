@@ -1,8 +1,20 @@
 #include "../include/8080emu.h"
+
+static void print_debug(State8080 *self)
+{
+	printf("cy=%d p=%d ac=%d z=%d s=%d\n", self->cc.cy, self->cc.p, 
+		self->cc.ac, self->cc.z, self->cc.s);
+	printf("b=0x%02x c=0x%02x d=0x%02x e=0x%02x h=0x%02x l=0x%02x a=0x%02x\n", self->b, self->c,
+		self->d, self->e, self->h, self->l, self->a);
+	printf("sp=0x%04x pc=0x%04x pc_inc=%d\n", self->sp, self->pc, self->pc_inc);
+}
+
 // Emulates an 8080 instruction based on current PC
-int emulate8080Op(State8080 *self)
+void emulate8080Op(State8080 *self)
 {
 	uint8_t *opcode = &self->memory[self->pc];
+
+	disassemble8080Op(self->memory, self->pc);
 
 	switch (*opcode)
 	{
@@ -752,18 +764,8 @@ int emulate8080Op(State8080 *self)
 		default: unimplementedInstruction(*opcode);
 	}
 
-	// This *might* cause an issue with jump instructions.
-	// Let's say we just jumped to an address. We've already moved up by
-	// an instruction.
-	// Idea: State8080 has a variable for opcode incrementation. Each time
-	// an instruction is called that doesn't increase the opcode by 1, it
-	// changes the opcodes variable. Below would look like:
-	//
-	// self->pc += self->opcodes;
-	// self->opcodes = 1;
-	//
-	// It would reset to one afterwards.
-	// So, if a function jumps address, it sets opcodes to 0.
-	// If a function uses 3 opcodes, it sets opcodes to 3.
-	self->pc++;
+	print_debug(self);
+
+	self->pc += self->pc_inc;
+	self->pc_inc = 1;
 }

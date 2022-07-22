@@ -4,10 +4,26 @@
 
 void init_8080(State8080 *self)
 {
+	self->cc.cy = 0;
+	self->cc.p = 0;
+	self->cc.ac = 0;
+	self->cc.z = 0;
+	self->cc.s = 0;
+
 	// Initalize PSW condition bits
 	self->cc.BIT_1 = 1;
 	self->cc.BIT_3 = 0;
 	self->cc.BIT_5 = 0;
+	
+	self->pc = 0;
+	self->sp = 0;
+
+	self->bc = 0;
+	self->de = 0;
+	self->hl = 0;
+	self->a = 0;
+
+	self->pc_inc = 1;
 }
 
 // Will run if an unimplemented instruction is called.
