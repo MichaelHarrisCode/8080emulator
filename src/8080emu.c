@@ -10,8 +10,10 @@ static void print_debug(State8080 *self)
 {
 	const int X_OFFSET = 11;
 	const int Y_OFFSET = 1;
+	const int INITIAL_LINE_COUNT = 3;
 
-	static unsigned short rows, cols;
+
+	static unsigned short rows=1, cols=1;
 	static int line_count = 1;
 	struct winsize window;
 	uint8_t psw = *(uint8_t *)&self->cc;
@@ -21,11 +23,11 @@ static void print_debug(State8080 *self)
 	
 	if (rows != window.ws_row || cols != window.ws_col) {
 		system("clear");
-		line_count = 1;
+		line_count = INITIAL_LINE_COUNT;
 	}
 
-	if (line_count % (rows - 1) == 0)
-		line_count = 1;
+	if (line_count % rows == 0)
+		line_count = INITIAL_LINE_COUNT;
 
 	rows = window.ws_row;
 	cols = window.ws_col;
@@ -43,7 +45,7 @@ static void print_debug(State8080 *self)
 	printf("de=0x%04x", self->de);
 	gotoxy(cols - X_OFFSET, 6 + Y_OFFSET);
 	printf("hl=0x%04x", self->hl);
-	gotoxy(cols - X_OFFSET, 7 + Y_OFFSET);
+	gotoxy(cols - X_OFFSET + 2, 7 + Y_OFFSET);
 	printf("a=0x%02x", self->a);
 	gotoxy(cols - X_OFFSET, 8 + Y_OFFSET);
 	printf("psw=0x%02x", psw);
@@ -52,11 +54,18 @@ static void print_debug(State8080 *self)
 	printf("cy=%d p=%d", self->cc.cy, self->cc.p);
 	gotoxy(cols - X_OFFSET, 11 + Y_OFFSET);
 	printf("ac=%d z=%d", self->cc.ac, self->cc.z);
-	gotoxy(cols - X_OFFSET, 12 + Y_OFFSET);
+	gotoxy(cols - X_OFFSET + 5, 12 + Y_OFFSET);
 	printf("s=%d", self->cc.s);
 
 
-	gotoxy(0, line_count);
+	gotoxy(0, line_count-1);
+
+	// Clears out long commands
+	for (int i = 0; i < cols - X_OFFSET - 2; i++)
+		printf(" ");
+
+	gotoxy(0, line_count-1);
+
 	line_count++;
 }
 
@@ -65,6 +74,7 @@ void emulate8080Op(State8080 *self)
 {
 	uint8_t *opcode = &self->memory[self->pc];
 
+	print_debug(self);
 	disassemble8080Op(self->memory, self->pc);
 
 	switch (*opcode)
@@ -814,8 +824,6 @@ void emulate8080Op(State8080 *self)
 
 		default: unimplementedInstruction(*opcode);
 	}
-
-	print_debug(self);
 
 	self->pc += self->pc_inc;
 	self->pc_inc = 1;
