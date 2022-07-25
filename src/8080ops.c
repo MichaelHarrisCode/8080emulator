@@ -1,5 +1,7 @@
 #include "../include/8080emu.h"
 
+#define CPUDIAG
+
 /**
  * Helper Functions
  */
@@ -81,6 +83,7 @@ static void ora(State8080 *self, uint8_t byte)
 
 	// Flags
 	self->cc.cy = 0;
+	self->cc.ac = 0;
 	flagsZSP(self, self->a);
 }
 
@@ -101,7 +104,8 @@ static void cmp(State8080 *self, uint8_t byte)
 	
 	// Carry flags
 	tc = ~byte + 1;
-	self->cc.cy = !((uint16_t)(self->a + tc) > 0xff);
+	//self->cc.cy = !((uint16_t)(self->a + tc) > 0xff);
+	self->cc.cy = self->a < byte;
 	flagAC(self, self->a, tc);
 	
 	result = self->a - byte;
@@ -111,10 +115,10 @@ static void cmp(State8080 *self, uint8_t byte)
 
 // Pushes two halves of a 16 bit register onto stack
 // Flags affected: None
-static void push(State8080 *self, uint8_t first, uint8_t second)
+static void push(State8080 *self, uint8_t high, uint8_t low)
 {
-	self->memory[self->sp - 1] = first;
-	self->memory[self->sp - 2] = second;
+	self->memory[self->sp - 1] = high;
+	self->memory[self->sp - 2] = low;
 
 	self->sp -= 2;
 }
@@ -122,10 +126,10 @@ static void push(State8080 *self, uint8_t first, uint8_t second)
 // Pops two 8 bit values into given register
 // Flags affected: None, unless PSW is selected for popping
 //		   In that case, they all may be affected
-static void pop(State8080 *self, uint8_t *first, uint8_t *second)
+static void pop(State8080 *self, uint8_t *high, uint8_t *low)
 {
-	*second = self->memory[self->sp];
-	*first = self->memory[self->sp + 1];
+	*low = self->memory[self->sp];
+	*high = self->memory[self->sp + 1];
 
 	self->sp += 2;
 }
@@ -397,17 +401,19 @@ void mvi_h_d8(State8080 *self, uint8_t d8)
 	self->pc_inc = 2;
 }
 
-// I'll probably have to review this logic
-// Only instructiuon affected by Auxiliary Carry
+// Only instruction affected by Auxiliary Carry
 void daa(State8080 *self)
 {
-	uint8_t lsb = self->a & 0xf;
-	uint8_t msb = self->a & 0xf0;
+	uint8_t lsb, msb;
+
+	lsb = self->a & 0xf;
 
 	if (lsb > 9 || self->cc.ac == 1) {
 		self->cc.ac = (lsb + 6) > 0xf;
 		self->a += 6;
 	}
+
+	msb = self->a & 0xf0;
 
 	if (msb > (9 << 4) || self->cc.cy == 1) {
 		self->cc.cy = ((uint16_t)(msb + (6 << 4)) > 0xff);
@@ -1335,6 +1341,21 @@ void call_adr(State8080 *self, uint8_t low, uint8_t high)
 	uint16_t address = address_concat(low, high);
 	uint8_t pc_low, pc_high;
 
+// For testing cpu functions
+#ifdef CPUDIAG
+	if (address == 0x0145) {
+		if (self->de = 0x018b) {
+			printf("CPU HAS FAILED. ERROR EXIT=0x%04x\n", self->hl);
+
+			exit(EXIT_FAILURE);
+		} else if (self->de = 0x0174) {
+			printf("CPU IS OPERATIONAL");
+
+			exit(EXIT_SUCCESS);
+		}
+	}
+#endif
+
 	pc_low = self->pc & 0xff;
 	pc_high = (self->pc & 0xff00) >> 8;
 
@@ -1504,6 +1525,7 @@ void rpe(State8080 *self)
 void pchl(State8080 *self)
 {
 	self->pc = self->hl;
+	self->pc_inc = 0;
 }
 
 void jpe_adr(State8080 *self, uint8_t low, uint8_t high)
@@ -1586,7 +1608,7 @@ void di(State8080 *self)
 
 void cp_adr(State8080 *self, uint8_t low, uint8_t high)
 {
-	!self->cc.z ? call_adr(self, low, high) : (self->pc_inc = 3);
+	!self->cc.s ? call_adr(self, low, high) : (self->pc_inc = 3);
 }
 
 void push_psw(State8080 *self)

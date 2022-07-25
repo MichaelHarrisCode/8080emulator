@@ -4,6 +4,7 @@
 #include <sys/ioctl.h>
 
 #define gotoxy(x,y) printf("\033[%d;%dH", (y), (x))
+#define clear_line() for (int i = 0; i < cols - X_OFFSET - 1; i++) printf(" ");
 
 // Displays register and condition codes on top right of terminal
 static void print_debug(State8080 *self)
@@ -13,19 +14,21 @@ static void print_debug(State8080 *self)
 	const int INITIAL_LINE_COUNT = 3;
 
 
-	static unsigned short rows=1, cols=1;
-	static int line_count = 1;
+	static unsigned short rows = 1, cols = 1;
+	static int line_count = INITIAL_LINE_COUNT;
 	struct winsize window;
 	uint8_t psw = *(uint8_t *)&self->cc;
 
-
+	// Gets window data
 	ioctl(STDIN_FILENO, TIOCGWINSZ, &window);
 	
+	// Resets if the terminal has been resized.
 	if (rows != window.ws_row || cols != window.ws_col) {
 		system("clear");
 		line_count = INITIAL_LINE_COUNT;
 	}
 
+	// Resets linecount to prevent overflow
 	if (line_count % rows == 0)
 		line_count = INITIAL_LINE_COUNT;
 
@@ -33,6 +36,7 @@ static void print_debug(State8080 *self)
 	cols = window.ws_col;
 
 
+	// This section prints the register and flag data
 	gotoxy(cols - X_OFFSET, 1 + Y_OFFSET);
 	printf("pc=0x%04x", self->pc);
 
@@ -58,13 +62,15 @@ static void print_debug(State8080 *self)
 	printf("s=%d", self->cc.s);
 
 
-	gotoxy(0, line_count-1);
+	// This section clears lines to show where the user is
+	// 	and to show clear line for next assembly instruction.
+	gotoxy(0, line_count - 1);
+	clear_line();
 
-	// Clears out long commands
-	for (int i = 0; i < cols - X_OFFSET - 2; i++)
-		printf(" ");
+	gotoxy(0, line_count);
+	clear_line();
 
-	gotoxy(0, line_count-1);
+	gotoxy(0, line_count - 1);
 
 	line_count++;
 }
