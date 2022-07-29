@@ -477,6 +477,7 @@ void cma(State8080 *self)
 void lxi_sp_d16(State8080 *self, uint8_t low, uint8_t high)
 {
 	self->sp = address_concat(low, high);
+	self->pc_inc = 3;
 }
 
 void sta_adr(State8080 *self, uint8_t low, uint8_t high)
@@ -1344,12 +1345,12 @@ void call_adr(State8080 *self, uint8_t low, uint8_t high)
 // For testing cpu functions
 #ifdef CPUDIAG
 	if (address == 0x0145) {
-		if (self->de = 0x018b) {
+		if (self->hl == 0x018b) {
 			printf("CPU HAS FAILED. ERROR EXIT=0x%04x\n", self->hl);
 
 			exit(EXIT_FAILURE);
-		} else if (self->de = 0x0174) {
-			printf("CPU IS OPERATIONAL");
+		} else if (self->hl == 0x0174) {
+			printf("CPU IS OPERATIONAL\n");
 
 			exit(EXIT_SUCCESS);
 		}
