@@ -1,9 +1,20 @@
 #include "../include/8080emu.h"
 
-#define CPUDIAG
-
 /**
  * Helper Functions
+ */
+
+static void memory_write(State8080* self, uint16_t address, uint8_t data)
+{
+	if (address > 0x2000) {
+		self->memory[address] = data;
+	}
+}
+
+
+
+/**
+ * General opcode functions
  */
 
 // Adds the register/byte to the accumulator
