@@ -25,7 +25,7 @@ struct ConditionCodes {
 
 struct State8080 {
 	uint8_t a, int_enable, pc_inc, memory[MAX_MEMORY];
-	uint16_t sp, pc;
+	uint16_t sp, pc, rom;
 	ConditionCodes cc;
 
 	// B and C registers
@@ -68,7 +68,7 @@ struct State8080 {
 // Debugging function.
 void unimplementedInstruction(uint8_t code);
 
-void init_8080(State8080 *self);
+void init_8080(State8080 *self, FILE* file);
 
 uint16_t address_concat(uint8_t low, uint8_t high);
 

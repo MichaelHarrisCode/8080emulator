@@ -4,9 +4,11 @@
  * Helper Functions
  */
 
+// This is kinda a guess. 
+// I think the ROM would apply to the whole size of the program memory
 static void memory_write(State8080* self, uint16_t address, uint8_t data)
 {
-	if (address > 0x2000) {
+	if (address > self->rom) {
 		self->memory[address] = data;
 	}
 }
@@ -128,8 +130,8 @@ static void cmp(State8080 *self, uint8_t byte)
 // Flags affected: None
 static void push(State8080 *self, uint8_t high, uint8_t low)
 {
-	self->memory[self->sp - 1] = high;
-	self->memory[self->sp - 2] = low;
+	memory_write(self, self->sp - 1, high);
+	memory_write(self, self->sp - 2, low);
 
 	self->sp -= 2;
 }
@@ -185,7 +187,7 @@ void lxi_b_d16(State8080 *self, uint8_t low, uint8_t high)
 
 void stax_b(State8080 *self)
 {
-	self->memory[self->bc] = self->a;
+	memory_write(self, self->bc, self->a);
 }
 
 void inx_b(State8080 *self)
@@ -284,7 +286,7 @@ void lxi_d_d16(State8080 *self, uint8_t low, uint8_t high)
 
 void stax_d(State8080 *self)
 {
-	self->memory[self->de] = self->a;
+	memory_write(self, self->de, self->a);
 }
 
 void inx_d(State8080 *self)
@@ -381,8 +383,8 @@ void shld_adr(State8080 *self, uint8_t low, uint8_t high)
 {
 	uint16_t address = address_concat(low, high);
 
-	self->memory[address] = self->l;
-	self->memory[address + 1] = self->h;
+	memory_write(self, address, self->l);
+	memory_write(self, address + 1, self->h);
 
 	self->pc_inc = 3;
 }
@@ -494,7 +496,7 @@ void lxi_sp_d16(State8080 *self, uint8_t low, uint8_t high)
 void sta_adr(State8080 *self, uint8_t low, uint8_t high)
 {
 	uint16_t address = address_concat(low, high);
-	self->memory[address] = self->a;
+	memory_write(self, address, self->a);
 
 	self->pc_inc = 3;
 }
@@ -507,20 +509,20 @@ void inx_sp(State8080 *self)
 void inr_m(State8080 *self)
 {
 	flagAC(self, self->memory[self->hl], 1);
-	self->memory[self->hl]++;
+	memory_write(self, self->hl, self->hl + 1);
 	flagsZSP(self, self->memory[self->hl]);
 }
 
 void dcr_m(State8080 *self)
 {
 	flagAC(self, self->memory[self->hl], -1);
-	self->memory[self->hl]--;
+	memory_write(self, self->hl, self->hl - 1);
 	flagsZSP(self, self->memory[self->hl]);
 }
 
 void mvi_m_d8(State8080 *self, uint8_t d8)
 {
-	self->memory[self->hl] = d8;
+	memory_write(self, self->hl, d8);
 	self->pc_inc = 2;
 }
 
@@ -844,32 +846,32 @@ void mov_l_a(State8080 *self)
 
 void mov_m_b(State8080 *self)
 {
-	self->memory[self->hl] = self->b;
+	memory_write(self, self->hl, self->b);
 }
 
 void mov_m_c(State8080 *self)
 {
-	self->memory[self->hl] = self->c;
+	memory_write(self, self->hl, self->c);
 }
 
 void mov_m_d(State8080 *self)
 {
-	self->memory[self->hl] = self->d;
+	memory_write(self, self->hl, self->d);
 }
 
 void mov_m_e(State8080 *self)
 {
-	self->memory[self->hl] = self->e;
+	memory_write(self, self->hl, self->e);
 }
 
 void mov_m_h(State8080 *self)
 {
-	self->memory[self->hl] = self->h;
+	memory_write(self, self->hl, self->h);
 }
 
 void mov_m_l(State8080 *self)
 {
-	self->memory[self->hl] = self->l;
+	memory_write(self, self->hl, self->l);
 }
 
 void hlt(State8080 *self)
@@ -879,7 +881,7 @@ void hlt(State8080 *self)
 
 void mov_m_a(State8080 *self)
 {
-	self->memory[self->hl] = self->a;
+	memory_write(self, self->hl, self->a);
 }
 
 void mov_a_b(State8080 *self)
@@ -1499,12 +1501,12 @@ void xthl(State8080 *self)
 	// Exchanges l
 	uint8_t temp = self->l;
 	self->l = self->memory[self->sp];
-	self->memory[self->sp] = temp;
+	memory_write(self, self->sp, temp); 
 
 	// Exchanges h
 	temp = self->h;
 	self->h = self->memory[self->sp + 1];
-	self->memory[self->sp + 1] = temp;
+	memory_write(self, self->sp + 1, temp); 
 }
 
 void cpo_adr(State8080 *self, uint8_t low, uint8_t high)

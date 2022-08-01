@@ -43,7 +43,6 @@ int main(int argc, char **argv)
 	// Runs code based on command line arguments
 	// Disassembling
 	if (strncmp(argv[1], "das", 3) == 0) {
-		// Gets file size
 		fseek(file, 0l, SEEK_END);
 		int file_size = ftell(file);
 		fseek(file, 0l, SEEK_SET);
@@ -62,22 +61,18 @@ int main(int argc, char **argv)
 	// Running
 	} else if (strncmp(argv[1], "run", 3) == 0) {
 		State8080 emu;
-		init_8080(&emu);
-
-		fseek(file, 0l, SEEK_END);
-		int file_size = ftell(file);
-		fseek(file, 0l, SEEK_SET);
-
-		if (file_size > MAX_MEMORY) {
-			printf("\033[0;31merror\033[0m: File too large");
-			exit(EXIT_FAILURE);
-		}
-
-		fread(emu.memory, file_size, 1, file);
-		fclose(file);
+		init_8080(&emu, file);
 
 		for (;;) {
 			emulate8080Op(&emu);
+		}
+	} else if (strncmp(argv[1], "dbg", 3) == 0) {
+		State8080 emu;
+		init_8080(&emu, file);
+
+		for (;;) {
+			emulate8080Op(&emu);
+			getchar();
 		}
 	} else {
 		printf("\033[0;31merror\033[0m: Unrecognized Command\n");

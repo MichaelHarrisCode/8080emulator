@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void init_8080(State8080 *self)
+void init_8080(State8080 *self, FILE* file)
 {
 	self->cc.cy = 0;
 	self->cc.p = 0;
@@ -24,6 +24,24 @@ void init_8080(State8080 *self)
 	self->a = 0;
 
 	self->pc_inc = 1;
+
+
+	/**
+	 * Reads data into memory
+	 */
+	fseek(file, 0l, SEEK_END);
+	int file_size = ftell(file);
+	fseek(file, 0l, SEEK_SET);
+
+	self->rom = file_size;
+
+	if (file_size > MAX_MEMORY) {
+		printf("\033[0;31merror\033[0m: File too large");
+		exit(EXIT_FAILURE);
+	}
+
+	fread(self->memory, file_size, 1, file);
+	fclose(file);
 }
 
 // Will run if an unimplemented instruction is called.

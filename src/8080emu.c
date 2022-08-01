@@ -61,6 +61,9 @@ static void print_debug(State8080 *self)
 	gotoxy(cols - X_OFFSET + 5, 12 + Y_OFFSET);
 	printf("s=%d", self->cc.s);
 
+	gotoxy(cols - X_OFFSET, 14 + Y_OFFSET);
+	printf("rom=0x%04x", self->rom);
+
 
 	// This section clears lines to show where the user is
 	// 	and to show clear line for next assembly instruction.
