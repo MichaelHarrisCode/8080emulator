@@ -9,7 +9,7 @@ Makefiles are used to make building this project easy.
 
 To build it, you can use:
 ```
-make build
+make
 ```
 This will create the `build` directory, which will contain an `obj` folder and a `bin` folder.
 
